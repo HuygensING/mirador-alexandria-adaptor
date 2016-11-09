@@ -20,7 +20,8 @@
 
     jQuery.extend(this, {
       url:		         options.url,
-      dfd:             null,
+      authkey:         options.authkey,
+      dfd:             null, // a Deferred object that is resolved when searches are complete
       annotationsList: [],        //OA list for Mirador use
       windowID:        null,
       eventEmitter:    null
@@ -51,11 +52,11 @@
           if (typeof successCallback === "function") {
             successCallback(data);
           } else {
-            jQuery.each(data, function(index, value) {
-              _this.annotationsList.push(_this.getAnnotationInOA(value));
+            _this.annotationsList = data; // gmr
+            jQuery.each(_this.annotationsList, function(index, value) {
+              value.endpoint = _this;
             });
-            _this.dfd.resolve(true);
-          }
+            _this.dfd.resolve(false);          }
         },
         error: function() {
           if (typeof errorCallback === "function") {
@@ -71,9 +72,7 @@
       jQuery.ajax({
         url: _this.url,
         type: 'DELETE',
-        dataType: 'json',
-        headers: { },
-        contentType: "application/json; charset=utf-8",
+        headers: authHeaders(),
         success: function(data) {
           if (typeof successCallback === "function") {
             successCallback();
@@ -89,16 +88,16 @@
 
     //Update an annotation given the OA version
     update: function(oaAnnotation, successCallback, errorCallback) {
-      var annotation = this.getAnnotationInEndpoint(oaAnnotation),
+      var annotation = oaAnnotation,
       _this = this;
 
       jQuery.ajax({
         url: _this.url,
         type: 'PUT',
         dataType: 'json',
-        headers: { },
-        data: '',
-        contentType: "application/json; charset=utf-8",
+        headers: authHeaders(),
+        data: JSON.stringify(oaAnnotation),
+        contentType: "application/ld+json;profile=\"http://iiif.io/api/presentation/2/context.json\"",
         success: function(data) {
           if (typeof successCallback === "function") {
             successCallback();
@@ -121,12 +120,13 @@
         url: _this.url,
         type: 'POST',
         dataType: 'json',
-        headers: { },
+        headers: _this.authHeaders(),
         data: JSON.stringify(oaAnnotation),
-        contentType: "application/json; charset=utf-8",
+        contentType: "application/ld+json;profile=\"http://iiif.io/api/presentation/2/context.json\"",
         success: function(data) {
           if (typeof successCallback === "function") {
-            successCallback(_this.getAnnotationInOA(data));
+            data.endpoint = _this;
+            successCallback(data);
           }
         },
         error: function() {
@@ -137,6 +137,10 @@
       });
     },
 
+    userAuthorize: function(action, annotation) {
+      return true;  // qallow all
+    },
+
     set: function(prop, value, options) {
       if (options) {
         this[options.parent][prop] = value;
@@ -145,12 +149,8 @@
       }
     },
 
-    //Convert Endpoint annotation to OA
-    getAnnotationInOA: function(annotation) {
-    },
-
-    // Converts OA Annotation to endpoint format
-    getAnnotationInEndpoint: function(oaAnnotation) {
+    authHeaders: function() {
+      return { "auth": "SimpleAuth " + this.authkey };
     }
   };
 
