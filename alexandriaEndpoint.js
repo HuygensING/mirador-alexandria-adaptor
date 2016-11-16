@@ -88,6 +88,7 @@
     update: function(oaAnnotation, successCallback, errorCallback) {
       var annotation = oaAnnotation,
       _this = this;
+
       // slashes don't work in JQuery.find which is used for delete
       // so need to switch http:// id to full id and back again for delete.
       shortId = annotation["@id"];
@@ -95,7 +96,7 @@
       delete annotation.fullId;
       delete annotation.endpoint;
       jQuery.ajax({
-        url: _this.url,
+        url: shortId, //_this.url,
         type: 'PUT',
         dataType: 'json',
         headers: _this.authHeaders(),
@@ -111,11 +112,11 @@
             errorCallback();
           }
         }
-        // this is what updates the viewer
-        annotation.endpoint = _this;
-        annotation.fullId = annotation["@id"];
-        annotation["@id"] = shortId;
       });
+      // this is what updates the viewer
+      annotation.endpoint = _this;
+      annotation.fullId = annotation["@id"];
+      annotation["@id"] = shortId;
     },
 
     //takes OA Annotation, gets Endpoint Annotation, and saves
