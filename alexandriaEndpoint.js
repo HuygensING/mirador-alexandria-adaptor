@@ -38,14 +38,12 @@
     //Search endpoint for all annotations with a given URI in options
     search: function(options, successCallback, errorCallback) {
       var _this = this;
-
-      //use options.uri
       jQuery.ajax({
         url: _this.url + "/search",
         type: 'GET',
         dataType: 'json',
         headers: { },
-        data: { },
+        data: { uri: options.uri },
         contentType: "application/json; charset=utf-8",
         success: function(data) {
           //check if a function has been passed in, otherwise, treat it as a normal search
@@ -70,9 +68,9 @@
     deleteAnnotation: function(annotationID, successCallback, errorCallback) {
       var _this = this;
       jQuery.ajax({
-        url: _this.url,
+        url: annotationID,
         type: 'DELETE',
-        headers: authHeaders(),
+        headers: _this.authHeaders(),
         success: function(data) {
           if (typeof successCallback === "function") {
             successCallback();
@@ -95,7 +93,7 @@
         url: _this.url,
         type: 'PUT',
         dataType: 'json',
-        headers: authHeaders(),
+        headers: _this.authHeaders(),
         data: JSON.stringify(oaAnnotation),
         contentType: "application/ld+json;profile=\"http://iiif.io/api/presentation/2/context.json\"",
         success: function(data) {
