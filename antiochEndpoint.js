@@ -16,7 +16,7 @@
  */
 (function($){
 
-  $.AlexandriaEndpoint = function(options) {
+  $.AntiochEndpoint = function(options) {
 
     jQuery.extend(this, {
       url:		         options.url,
@@ -30,7 +30,7 @@
     this.init();
   };
 
-  $.AlexandriaEndpoint.prototype = {
+  $.AntiochEndpoint.prototype = {
     init: function() {
       //whatever initialization your endpoint needs
     },
